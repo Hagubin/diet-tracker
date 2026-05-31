@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en-US" data-theme="day">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("dietTracker_v4");
+        var saved = raw ? JSON.parse(raw) : null;
+        var night = saved && saved.settings && saved.settings.theme === "night";
+        var mode = night ? "night" : "day";
+        document.documentElement.setAttribute("data-theme", mode);
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var cs = document.querySelector('meta[name="color-scheme"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute("content", night ? "#000000" : "#f2f2f7");
+        if (cs) cs.setAttribute("content", night ? "dark" : "light");
+        if (sb) sb.setAttribute("content", night ? "black" : "default");
+        document.documentElement.style.colorScheme = night ? "dark" : "light";
+      } catch (e) {}
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#f2f2f7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Diet" />
+  <title>Diet</title>
+  <link rel="manifest" href="files/manifest.webmanifest" />
+  <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
+  <link rel="stylesheet" href="files/styles.css?v=59" />
+</head>
+<body class="app-shell">
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 id="pageTitle">Summary</h1>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Switch to night mode">Night</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="view active" id="view-summary" data-view="summary">
+      <div class="view-scroll view-scroll--static">
+        <div class="view-section view-section--first">
+          <div class="intake-hero group">
+            <p class="intake-hero-label">Intake left today</p>
+            <p class="intake-hero-value-wrap"><span class="intake-hero-value" id="calorieLeftHero">—</span><span class="intake-hero-unit hidden" id="calorieLeftUnit"> kcal</span></p>
+            <p class="intake-hero-sub hidden" id="calorieLeftSub"></p>
+          </div>
+        </div>
+        <div class="view-section">
+          <p class="section-label">Today</p>
+          <div class="group">
+            <p class="today-date" id="todayDate"></p>
+            <ul class="status-list">
+              <li class="status-row"><span class="status-label">Water</span><span class="status-value" id="waterStatusText">None</span></li>
+              <li class="status-row"><span class="status-label">Food</span><span class="status-value" id="foodStatusText">None</span></li>
+              <li class="status-row"><span class="status-label">Exercise</span><span class="status-value" id="exerciseStatusText">None</span></li>
+              <li class="status-row"><span class="status-label">Weight</span><span class="status-value" id="weightStatusText">None</span></li>
+              <li class="status-row status-row--stacked"><span class="status-label">Progress</span><span class="status-value status-value--wrap" id="progressStatusText">—</span></li>
+              <li class="status-row"><span class="status-label">On track</span><span class="status-value" id="trackStatusText">—</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-food" data-view="food">
+      <div class="food-pane" id="foodScroll">
+        <div class="view-section view-section--first view-section--compact">
+          <p class="section-label">Water</p>
+          <div class="group group-padded group--compact">
+            <div class="water-head">
+              <div class="water-count-wrap">
+                <span class="water-count" id="waterCountLine">0 bottles</span>
+                <span class="water-done-tag hidden" id="waterDoneTag">Done</span>
+              </div>
+              <p class="water-per-bottle" id="waterHint">1.2 L per bottle</p>
+            </div>
+            <div
+              class="water-progress"
+              id="waterProgressBar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Water toward daily goal"
+            >
+              <div class="water-progress-fill" id="waterProgressFill"></div>
+            </div>
+            <p class="water-goal-line" id="waterGoalLine">Goal: 1.5 bottles (1.8 L)</p>
+            <div class="water-actions">
+              <button type="button" class="btn btn-tinted" id="waterMinus" aria-label="Remove bottle">−</button>
+              <button type="button" class="btn btn-filled" id="waterPlus">+ Bottle</button>
+            </div>
+          </div>
+        </div>
+        <div class="view-section view-section--compact">
+          <p class="section-label">Meals</p>
+          <div class="group">
+            <div class="meal-tabs" id="mealTypeSegment">
+              <button type="button" class="meal-tab" data-meal="breakfast">Breakfast</button>
+              <button type="button" class="meal-tab is-selected" data-meal="lunch">Lunch</button>
+              <button type="button" class="meal-tab" data-meal="dinner">Dinner</button>
+              <button type="button" class="meal-tab" data-meal="snacks">Snacks</button>
+              <button type="button" class="meal-tab" data-meal="drinks">Drinks</button>
+            </div>
+            <div id="foodRecordPanel">
+              <div class="meal-log-mode hidden" id="mealLogModeRow">
+                <button type="button" class="meal-log-mode-btn is-selected" data-mode="fixed">Fixed</button>
+                <button type="button" class="meal-log-mode-btn" data-mode="build">Build</button>
+              </div>
+              <div id="foodFixedPanel">
+                <form id="foodQuickAddForm" class="plate-add-form">
+                  <input type="text" id="foodQuickAddName" placeholder="Item" autocomplete="off" />
+                  <input type="number" id="foodQuickAddKcal" class="plate-add-kcal" placeholder="kcal" min="0" max="9999" inputmode="numeric" />
+                  <button type="submit" class="btn btn-tinted">Save</button>
+                </form>
+                <div class="meal-food-library is-empty">
+                  <div id="foodFixedLibraryList" class="meal-food-library-scroll"></div>
+                </div>
+                <p id="fixedTotalCal" class="meal-total hidden"></p>
+                <button type="button" class="btn btn-filled hidden" id="fixedSaveBtn">Add to intake</button>
+              </div>
+              <div id="foodBuildPanel" class="hidden">
+                <form id="plateAddCustomForm" class="plate-add-form">
+                  <input type="text" id="plateCustomName" placeholder="Item" autocomplete="off" />
+                  <button type="submit" class="btn btn-tinted">Save</button>
+                </form>
+                <div class="meal-food-library is-empty">
+                  <div id="plateFoodLibraryList" class="meal-food-library-scroll"></div>
+                </div>
+                <p class="field-caption inset-top hidden" id="plateMealSectionLabel">This meal</p>
+                <div id="plateDraftList" class="plate-draft-list"></div>
+                <p id="plateTotalRange" class="meal-total hidden"></p>
+                <button type="button" class="btn btn-filled hidden" id="plateSaveBtn">Add to intake</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <details class="disclosure food-disclosure" id="foodTodayDetails">
+          <summary>History</summary>
+          <div id="todayFoodList" class="log-list food-disclosure-body"></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="view" id="view-exercise" data-view="exercise">
+      <div class="view-scroll">
+        <div class="view-section view-section--first">
+          <p class="section-label">Record</p>
+          <div class="group">
+            <div class="card-header-row card-header-row--inset">
+              <span class="card-header-title">Type</span>
+              <button type="button" class="btn-icon-add" id="addExerciseTypeBtn" aria-label="Add exercise">+</button>
+            </div>
+            <div class="exercise-type-list" id="exerciseTypePick"></div>
+            <form id="exerciseForm">
+              <div class="field-row"><label for="exerciseMinutes">Duration (min)</label><input type="number" id="exerciseMinutes" min="1" max="30" value="20" /></div>
+              <div class="field-row"><label for="exerciseCaloriesManual">Calories (opt)</label><input type="number" id="exerciseCaloriesManual" inputmode="numeric" min="0" placeholder="Auto" /></div>
+              <div class="field-row field-row-action">
+                <button type="submit" class="btn btn-filled btn-block">Save exercise</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="view-section">
+          <p class="section-label">Today</p>
+          <div class="group"><div id="exerciseTodayList" class="log-list"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-profile" data-view="profile">
+      <div class="view-scroll">
+        <div id="profileSetupBlock">
+          <div class="view-section view-section--first">
+            <p class="section-label">Baseline</p>
+            <p class="field-caption block-caption">Set once: height, starting weight, goal.</p>
+            <form id="profileSetupForm" class="group">
+              <div class="field-row"><label for="setupAge">Age</label><input type="number" id="setupAge" inputmode="numeric" min="10" max="120" /></div>
+              <div class="field-row">
+                <span class="field-row-label">Sex</span>
+                <select id="setupSex" class="field-select"><option value="male">Male</option><option value="female">Female</option></select>
+              </div>
+              <div class="field-row"><label for="setupHeight">Height (cm)</label><input type="number" id="setupHeight" inputmode="decimal" step="0.1" /></div>
+              <div class="field-row"><label for="setupWeight">Starting weight (kg)</label><input type="number" id="setupWeight" inputmode="decimal" step="0.1" /></div>
+              <div class="field-row"><label for="setupIdeal">Ideal weight (kg)</label><input type="number" id="setupIdeal" inputmode="decimal" step="0.1" /></div>
+              <div class="field-row field-row-action"><button type="submit" class="btn btn-filled btn-block">Set baseline</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="profileMainBlock" class="hidden">
+          <div class="view-section view-section--first view-section--tight">
+            <div class="baseline-header">
+              <span class="baseline-header-label">Baseline</span>
+              <button type="button" class="btn-link" id="editBaselineBtn" aria-expanded="false">Edit</button>
+            </div>
+            <div class="group group-padded baseline-card" id="baselineSummary"></div>
+            <form id="profileEditForm" class="group hidden">
+              <div class="field-row"><label for="editAge">Age</label><input type="number" id="editAge" inputmode="numeric" min="10" max="120" /></div>
+              <div class="field-row"><span class="field-row-label">Sex</span><select id="editSex" class="field-select field-select--full"><option value="male">Male</option><option value="female">Female</option></select></div>
+              <div class="field-row"><label for="editHeight">Height (cm)</label><input type="number" id="editHeight" inputmode="decimal" step="0.1" /></div>
+              <div class="field-row"><label for="editIdeal">Ideal weight (kg)</label><input type="number" id="editIdeal" inputmode="decimal" step="0.1" /></div>
+              <div class="field-row field-row-action"><button type="submit" class="btn btn-tinted btn-block">Save baseline</button></div>
+            </form>
+          </div>
+
+          <div class="view-section view-section--tight">
+            <p class="section-label">Update</p>
+            <form id="weightForm" class="group">
+              <div class="field-row"><label for="todayWeight">Weight today (kg)</label><input type="number" id="todayWeight" inputmode="decimal" step="0.1" min="30" max="300" /></div>
+              <div class="field-row field-row-action"><button type="submit" class="btn btn-filled btn-block">Save weight</button></div>
+            </form>
+          </div>
+
+          <div class="view-section" id="profileWeightBlock">
+            <p class="section-label">Tracker</p>
+            <div class="group group-padded">
+              <div class="month-nav">
+                <button type="button" class="btn btn-tinted btn-compact" id="monthOlder" aria-label="Older month">‹</button>
+                <p class="month-nav-title" id="monthNavTitle">—</p>
+                <button type="button" class="btn btn-tinted btn-compact" id="monthNewer" aria-label="Newer month">›</button>
+              </div>
+              <div class="month-weekdays" aria-hidden="true">
+                <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+              </div>
+              <div class="month-grid month-grid--data" id="monthGrid" aria-label="Month"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="view-section view-section--last">
+          <div class="group">
+            <button type="button" class="row-link row-link-destructive" id="resetData"><span class="row-link-label">Reset all data…</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tab-bar" aria-label="Main">
+    <button type="button" class="tab active" data-tab="summary" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5h6v6H4V5zm10 0h6v6h-6V5zM4 13h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg>
+      <span class="tab-label">Summary</span>
+    </button>
+    <button type="button" class="tab" data-tab="food">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c-3.9 0-7 2.5-7 5.5V12h14V9.5C19 6.5 15.9 4 12 4zm-9 9v3c0 2.8 4 5 9 5s9-2.2 9-5v-3H3zm2 3v1c0 1.5 3.1 3 7 3s7-1.5 7-3v-1H5z"/></svg>
+      <span class="tab-label">Food</span>
+    </button>
+    <button type="button" class="tab" data-tab="exercise">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 4c-2.2 0-4 1.6-4 3.6V11H3.5C2.1 11 1 12.1 1 13.5S2.1 16 3.5 16H5v3.5c0 .8.7 1.5 1.5 1.5h1c.8 0 1.5-.7 1.5-1.5V16h4v3.5c0 .8.7 1.5 1.5 1.5h1c.8 0 1.5-.7 1.5-1.5V16h1.5c1.4 0 2.5-1.1 2.5-2.5v-2.9H22v-3.4C22 5.6 20.2 4 18 4h-2V3.6C16 1.6 14.2 0 12 0S8 1.6 8 3.6V4z"/></svg>
+      <span class="tab-label">Exercise</span>
+    </button>
+    <button type="button" class="tab" data-tab="profile">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 11a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 12 11zm0 2c-2.8 0-5 1.5-5 3.3V18h10v-1.7c0-1.8-2.2-3.3-5-3.3z"/></svg>
+      <span class="tab-label">Profile</span>
+    </button>
+  </nav>
+
+  <div id="exerciseTypeModal" class="sheet-modal hidden" role="dialog" aria-labelledby="exerciseModalTitle" aria-modal="true">
+    <button type="button" class="sheet-backdrop" id="exerciseModalBackdrop" aria-label="Close"></button>
+    <div class="sheet-panel">
+      <p class="sheet-title" id="exerciseModalTitle">Add exercise</p>
+      <form id="addExerciseTypeForm" class="form-stack">
+        <label>
+          <span class="field-caption">Name</span>
+          <input type="text" id="newExerciseTypeName" placeholder="e.g. Running" autocomplete="off" />
+        </label>
+        <p class="field-caption" id="newExerciseTypeHint">Burn rate estimated from name.</p>
+        <button type="submit" class="btn btn-filled">Add</button>
+        <button type="button" class="btn btn-tinted" id="exerciseModalCancel">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="files/body-math.js"></script>
+  <script src="files/plate-meal.js"></script>
+  <script src="files/drink-meal.js"></script>
+  <script src="files/sg-nutrition-db.js"></script>
+  <script src="files/app.js"></script>
+</body>
+</html>
