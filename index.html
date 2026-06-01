@@ -30,7 +30,7 @@
   <link rel="manifest" href="files/manifest.webmanifest" />
   <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
-  <link rel="stylesheet" href="files/styles.css?v=59" />
+  <link rel="stylesheet" href="files/styles.css?v=61" />
 </head>
 <body class="app-shell">
   <header class="site-header">
@@ -232,6 +232,16 @@
             </div>
           </div>
 
+        </div>
+
+        <div class="view-section view-section--tight">
+          <p class="section-label">Backup</p>
+          <p class="field-caption block-caption">Move data to a new Home Screen icon or another phone — export here, import on the other install.</p>
+          <div class="group">
+            <button type="button" class="row-link" id="exportDataBtn"><span class="row-link-label">Export backup…</span></button>
+            <button type="button" class="row-link" id="importDataBtn"><span class="row-link-label">Import backup…</span></button>
+          </div>
+          <input type="file" id="importDataFile" accept="application/json,.json" hidden />
         </div>
 
         <div class="view-section view-section--last">

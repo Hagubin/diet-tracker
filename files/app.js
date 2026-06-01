@@ -511,6 +511,15 @@
     return null;
   }
 
+  /** Kcal shown in the library / before override is stored (estimate or yours). */
+  function presetDisplayedKcal(meal, name) {
+    const ov = presetKcalOverride(meal, name);
+    if (ov != null) return Math.round(ov);
+    const info = getPresetCalorieInfo(meal, name);
+    if (info.kcal != null && Number.isFinite(info.kcal)) return Math.round(info.kcal);
+    return null;
+  }
+
   function getPresetCalorieInfo(meal, name) {
     const override = presetKcalOverride(meal, name);
     if (override != null) {
@@ -616,6 +625,73 @@
     } catch {
       return defaultState();
     }
+  }
+
+  const BACKUP_FILE_VERSION = 1;
+
+  function buildBackupPayload() {
+    const snapshot = JSON.parse(JSON.stringify(state));
+    if (snapshot.drinkFoods) delete snapshot.drinkFoods;
+    return {
+      app: "diet-tracker",
+      backupVersion: BACKUP_FILE_VERSION,
+      storageKey: STORAGE_KEY,
+      exportedAt: new Date().toISOString(),
+      state: snapshot,
+    };
+  }
+
+  function exportBackup() {
+    const payload = buildBackupPayload();
+    const json = JSON.stringify(payload, null, 2);
+    const date = todayStr();
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `diet-backup-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importBackupFromObject(raw) {
+    const inner = raw?.state && typeof raw.state === "object" ? raw.state : raw;
+    if (!inner || typeof inner !== "object") {
+      alert("That file does not look like a Diet backup.");
+      return false;
+    }
+    state = migrateFromOlder(inner);
+    monthNavIndex = 0;
+    selectedExerciseType = state.exerciseTypes?.[0]?.id || "fitness_boxing";
+    activeMeal = "lunch";
+    resetMealDrafts();
+    saveState();
+    applyTheme(state.settings.theme);
+    render();
+    return true;
+  }
+
+  function importBackupFromFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const raw = JSON.parse(reader.result);
+        if (
+          !confirm(
+            "Replace all data on this install with the backup?\n\nCurrent meals, lists, and baseline on this icon will be overwritten."
+          )
+        ) {
+          return;
+        }
+        if (importBackupFromObject(raw)) {
+          alert("Backup imported. Your data is restored on this install.");
+        }
+      } catch {
+        alert("Could not read that file. Use a Diet export (.json) you saved earlier.");
+      }
+    };
+    reader.readAsText(file);
   }
 
   function saveState() {
@@ -1144,8 +1220,28 @@
     if (!name || quickAddKcalTouched || !$("foodQuickAddKcal")) return;
     const ov = presetKcalOverride(activeMeal, name);
     const cat = activeMeal === "snacks" ? snackCatalogKcal(name) : null;
-    const v = ov != null ? ov : cat;
-    $("foodQuickAddKcal").value = v != null ? v : "";
+    let v = ov != null ? ov : cat;
+    if (v == null) {
+      const info = getPresetCalorieInfo(activeMeal, name);
+      if (info.kcal != null && Number.isFinite(info.kcal)) v = Math.round(info.kcal);
+    }
+    $("foodQuickAddKcal").value = v != null ? String(v) : "";
+  }
+
+  let quickAddNutritionGen = 0;
+
+  function onQuickAddNameInput() {
+    const gen = ++quickAddNutritionGen;
+    ensureNutritionForMeal(activeMeal)
+      .then(() => {
+        if (gen !== quickAddNutritionGen) return;
+        syncQuickAddKcalFromName();
+        renderFixedLogActions();
+      })
+      .catch(() => {
+        syncQuickAddKcalFromName();
+        renderFixedLogActions();
+      });
   }
 
   function addQuickAddToDraftOnly() {
@@ -1942,6 +2038,7 @@
       alert("An item with that name is already on your list.");
       return;
     }
+    const lockedKcal = presetDisplayedKcal(meal, oldName);
     state.foodPresets[meal][index] = newName;
     const ov = state.presetKcalOverrides[meal];
     if (ov) {
@@ -1950,6 +2047,10 @@
         ov[newName] = ov[oldKey];
         delete ov[oldKey];
       }
+    }
+    if (lockedKcal != null) {
+      if (!state.presetKcalOverrides[meal]) state.presetKcalOverrides[meal] = {};
+      state.presetKcalOverrides[meal][newName] = lockedKcal;
     }
     fixedDraft = fixedDraft.map((d) =>
       draftItemKey(d.name) === draftItemKey(oldName) ? { ...d, name: newName } : d
@@ -2546,10 +2647,7 @@
       }
     });
 
-    $("foodQuickAddName")?.addEventListener("input", () => {
-      syncQuickAddKcalFromName();
-      renderFixedLogActions();
-    });
+    $("foodQuickAddName")?.addEventListener("input", onQuickAddNameInput);
     $("foodQuickAddKcal")?.addEventListener("input", () => {
       quickAddKcalTouched = true;
       renderFixedLogActions();
@@ -2571,9 +2669,17 @@
       } else {
         presetName = state.foodPresets[meal][idx];
       }
+      let kcal = null;
       const kcalRaw = $("foodQuickAddKcal")?.value;
-      const kcal = kcalRaw === "" || kcalRaw == null ? null : parseInt(kcalRaw, 10);
-      if (kcal != null && Number.isFinite(kcal) && kcal >= 0) {
+      if (kcalRaw !== "" && kcalRaw != null) {
+        const parsed = parseInt(kcalRaw, 10);
+        if (Number.isFinite(parsed) && parsed >= 0) kcal = parsed;
+      }
+      if (kcal == null) {
+        const est = getPresetCalorieInfo(meal, presetName).kcal;
+        if (est != null && Number.isFinite(est)) kcal = Math.round(est);
+      }
+      if (kcal != null) {
         if (!state.presetKcalOverrides[meal]) state.presetKcalOverrides[meal] = {};
         state.presetKcalOverrides[meal][presetName] = kcal;
       }
@@ -2587,6 +2693,14 @@
       applyTheme(state.settings.theme);
       syncThemeToggle();
       saveState();
+    });
+
+    $("exportDataBtn")?.addEventListener("click", exportBackup);
+    $("importDataBtn")?.addEventListener("click", () => $("importDataFile")?.click());
+    $("importDataFile")?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      importBackupFromFile(file);
     });
 
     $("resetData").addEventListener("click", () => {
