@@ -89,30 +89,71 @@ window.DietBodyMath = (function () {
     const ideal = profile.idealWeightKg;
     const start = profile.goalStartDate;
     const startKg = profile.startWeightKg;
-    const plan = goalPlan(startKg, ideal, profile.heightCm, profile.age, profile.sex);
     const latest = latestWeight(entries);
-    if (!latest || !plan || !start || startKg == null) {
+    if (!latest || !start || startKg == null || ideal == null) {
       return { ok: null, label: "—", detail: "Set baseline and record weight." };
     }
 
-    const expected = projectedWeight(startKg, start, plan.weeklyKg, latest.date);
     const tolerance = 0.6;
-    const ok = Math.abs(latest.weightKg - expected) <= tolerance;
-    const toward =
-      plan.direction === "loss"
-        ? latest.weightKg <= startKg + 0.15
-        : latest.weightKg >= startKg - 0.15;
-
-    if (!toward && Math.sign(latest.weightKg - startKg) !== Math.sign(plan.weeklyKg)) {
-      return { ok: false, label: "No", detail: "Moving away from goal." };
+    if (Math.abs(startKg - ideal) < 0.01) {
+      const delta = latest.weightKg - ideal;
+      const ok = Math.abs(delta) <= tolerance;
+      const dir =
+        delta > tolerance ? "above" : delta < -tolerance ? "below" : "at";
+      return {
+        ok,
+        label: ok ? "Yes" : "No",
+        detail: ok
+          ? `Within ${tolerance} kg of goal (${ideal.toFixed(1)} kg).`
+          : `${Math.abs(delta).toFixed(1)} kg ${dir} goal (${ideal.toFixed(1)} kg).`,
+        expected: ideal,
+        actual: latest.weightKg,
+      };
     }
 
+    const plan = goalPlan(startKg, ideal, profile.heightCm, profile.age, profile.sex);
+    if (!plan) {
+      return { ok: null, label: "—", detail: "Set baseline and record weight." };
+    }
+
+    const expectedToday = projectedWeight(startKg, start, plan.weeklyKg, asOfDate);
+    if (expectedToday == null) {
+      return { ok: null, label: "—", detail: "Set baseline and record weight." };
+    }
+
+    const actual = latest.weightKg;
+    const expLabel = expectedToday.toFixed(1);
+
+    if (plan.direction === "loss") {
+      const ok = actual <= expectedToday + 0.05;
+      const over = actual - expectedToday;
+      const detail = ok
+        ? `~${expLabel} kg expected today · ${actual.toFixed(1)} kg`
+        : over > 0.05
+          ? `~${expLabel} kg expected today · ${actual.toFixed(1)} kg (${over.toFixed(1)} above)`
+          : `~${expLabel} kg expected today · ${actual.toFixed(1)} kg`;
+      return {
+        ok,
+        label: ok ? "Yes" : "No",
+        detail,
+        expected: expectedToday,
+        actual,
+      };
+    }
+
+    const ok = actual >= expectedToday - 0.05;
+    const under = expectedToday - actual;
+    const detail = ok
+      ? `~${expLabel} kg expected today · ${actual.toFixed(1)} kg`
+      : under > 0.05
+        ? `~${expLabel} kg expected today · ${actual.toFixed(1)} kg (${under.toFixed(1)} below)`
+        : `~${expLabel} kg expected today · ${actual.toFixed(1)} kg`;
     return {
       ok,
       label: ok ? "Yes" : "No",
-      detail: ok ? "Within expected range." : `Expected about ${expected.toFixed(1)} kg.`,
-      expected,
-      actual: latest.weightKg,
+      detail,
+      expected: expectedToday,
+      actual,
     };
   }
 
