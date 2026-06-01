@@ -1946,11 +1946,14 @@
 
     const track = M.onTrackStatus(state.weightEntries, state.profile, todayStr());
     const trackEl = $("trackStatusText");
-    trackEl.textContent =
-      track.detail && track.label !== "—" ? `${track.label} · ${track.detail}` : track.label;
     trackEl.classList.remove("on-track-yes", "on-track-no", "is-set");
     if (track.ok === true) trackEl.classList.add("on-track-yes", "is-set");
     if (track.ok === false) trackEl.classList.add("on-track-no", "is-set");
+    if (track.detail && track.label !== "—") {
+      trackEl.innerHTML = `<span class="track-status-head">${escapeHtml(track.label)}</span><span class="track-status-detail">${escapeHtml(track.detail)}</span>`;
+    } else {
+      trackEl.textContent = track.label;
+    }
   }
 
   function renderLogItem(container, meta, body, onDelete, options = {}) {

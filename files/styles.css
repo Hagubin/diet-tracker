@@ -461,6 +461,41 @@ html[data-theme="night"] .intake-hero-value.is-over + .intake-hero-unit {
   padding-bottom: 14px;
 }
 
+.status-row--track {
+  gap: 10px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.track-status-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  line-height: 22px;
+}
+
+.track-status-head {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.track-status-detail {
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--label-secondary);
+}
+
+.status-value.on-track-yes .track-status-head {
+  color: var(--label);
+}
+
+.status-value.on-track-no .track-status-head {
+  color: var(--destructive);
+}
+
 .status-label {
   font-size: 17px;
   flex-shrink: 0;
