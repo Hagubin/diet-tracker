@@ -30,7 +30,7 @@
   <link rel="manifest" href="files/manifest.webmanifest" />
   <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
-  <link rel="stylesheet" href="files/styles.css?v=62" />
+  <link rel="stylesheet" href="files/styles.css?v=63" />
 </head>
 <body class="app-shell">
   <header class="site-header">
@@ -60,9 +60,12 @@
               <li class="status-row"><span class="status-label">Exercise</span><span class="status-value" id="exerciseStatusText">None</span></li>
               <li class="status-row"><span class="status-label">Weight</span><span class="status-value" id="weightStatusText">None</span></li>
               <li class="status-row status-row--stacked"><span class="status-label">Progress</span><span class="status-value status-value--wrap" id="progressStatusText">—</span></li>
-              <li class="status-row status-row--stacked status-row--track">
-                <span class="status-label">On track</span>
-                <div class="status-value status-value--wrap track-status-block" id="trackStatusText">—</div>
+              <li class="status-row--track">
+                <div class="status-track-primary">
+                  <span class="status-label">On track</span>
+                  <span class="status-value track-status-head" id="trackStatusHead">—</span>
+                </div>
+                <p class="track-status-detail hidden" id="trackStatusDetail"></p>
               </li>
             </ul>
           </div>
@@ -290,10 +293,10 @@
     </div>
   </div>
 
-  <script src="files/body-math.js"></script>
-  <script src="files/plate-meal.js"></script>
-  <script src="files/drink-meal.js"></script>
-  <script src="files/sg-nutrition-db.js"></script>
-  <script src="files/app.js"></script>
+  <script src="files/body-math.js?v=63"></script>
+  <script src="files/plate-meal.js?v=63"></script>
+  <script src="files/drink-meal.js?v=63"></script>
+  <script src="files/sg-nutrition-db.js?v=63"></script>
+  <script src="files/app.js?v=63"></script>
 </body>
 </html>
