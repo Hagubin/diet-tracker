@@ -1,8 +1,1 @@
-/* Minimal service worker — enables installed PWA features on iOS 16.4+ */
-self.addEventListener("install", (event) => {
-  event.waitUntil(self.skipWaiting());
-});
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
+/* Unused — service worker lives at /diet-tracker/sw.js (repo root). */

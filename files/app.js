@@ -1,11 +1,13 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
+  const APP_RELEASE = 64;
+  const BUILD_STORAGE_KEY = "dietAppBuild";
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
   const PM = window.DietPlateMeal;
   const DM = window.DietDrinkMeal;
   const SG = window.DietSgNutrition;
-  const NUTRITION_BUNDLE_V = "60";
+  const NUTRITION_BUNDLE_V = String(APP_RELEASE);
   const nutritionBundles = { drinks: false, food: false };
   const nutritionScriptLoads = new Map();
 
@@ -2707,6 +2709,10 @@
       saveState();
     });
 
+    $("forceAppUpdateBtn")?.addEventListener("click", () => {
+      forceAppUpdate();
+    });
+
     $("exportDataBtn")?.addEventListener("click", exportBackup);
     $("importDataBtn")?.addEventListener("click", () => $("importDataFile")?.click());
     $("importDataFile")?.addEventListener("change", (e) => {
@@ -2738,6 +2744,43 @@
     });
   }
 
+  async function fetchRemoteBuild() {
+    const res = await fetch(`files/version.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Number.isFinite(data.build) ? data.build : null;
+  }
+
+  async function forceAppUpdate() {
+    if (
+      !confirm(
+        "Load the newest Diet app from the server?\n\nYour meal logs and settings stay on this phone. The screen may flash once."
+      )
+    ) {
+      return;
+    }
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (_) {}
+    const remote = await fetchRemoteBuild().catch(() => null);
+    const bump = remote != null ? remote : APP_RELEASE;
+    localStorage.setItem(BUILD_STORAGE_KEY, String(Math.max(0, bump - 1)));
+    const base = location.pathname.split("?")[0];
+    location.replace(`${base}?refresh=${Date.now()}`);
+  }
+
+  function syncAppVersionLabel() {
+    const el = $("appVersionLabel");
+    if (el) el.textContent = `v${APP_RELEASE}`;
+  }
+
   function wireIconCacheBust() {
     document.querySelectorAll('link[rel="apple-touch-icon"]').forEach((link) => {
       const base = (link.getAttribute("href") || "").split("?")[0];
@@ -2747,6 +2790,7 @@
 
   bindEvents();
   wireIconCacheBust();
+  syncAppVersionLabel();
   window.addEventListener("resize", updateScrollLocks);
   render();
   showView("summary");

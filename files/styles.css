@@ -1317,6 +1317,13 @@ html[data-theme="night"] .month-grid--data .month-cell.is-over-budget .month-cel
   flex: 1;
 }
 
+.row-link-meta {
+  flex-shrink: 0;
+  margin-left: 12px;
+  font-size: 15px;
+  color: var(--label-tertiary);
+}
+
 .row-link-destructive .row-link-label {
   color: var(--destructive);
   text-align: center;
