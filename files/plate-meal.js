@@ -1,17 +1,17 @@
 (function (global) {
-  const BOWL_SIZES = ["half", "twoThirds", "one"];
-  const PLATE_SIZES = ["half", "twoThirds", "one"];
+  const BOWL_SIZES = ["third", "half", "twoThirds", "one"];
+  const PLATE_SIZES = ["third", "half", "twoThirds", "one"];
 
   const SIZE_LABEL = {
-    bowl: { half: "½ bowl", twoThirds: "⅔ bowl", one: "1 bowl" },
-    plate: { half: "½ plate", twoThirds: "⅔ plate", one: "1 plate" },
+    bowl: { third: "⅓ bowl", half: "½ bowl", twoThirds: "⅔ bowl", one: "1 bowl" },
+    plate: { third: "⅓ plate", half: "½ plate", twoThirds: "⅔ plate", one: "1 plate" },
   };
 
   const LEGACY_SIZE = { full: "one", two: "one" };
 
   const GENERIC_RANGES = {
-    bowl: { half: [80, 140], twoThirds: [130, 210], one: [180, 280] },
-    plate: { half: [70, 130], twoThirds: [115, 195], one: [160, 260] },
+    bowl: { third: [60, 95], half: [80, 140], twoThirds: [130, 210], one: [180, 280] },
+    plate: { third: [55, 90], half: [70, 130], twoThirds: [115, 195], one: [160, 260] },
   };
 
   const DEFAULT_PLATE_FOODS = [
@@ -59,13 +59,32 @@
     ];
   }
 
+  function bandOneThird(one) {
+    return [Math.round(one[0] / 3), Math.round(one[1] / 3)];
+  }
+
   function normalizeBands(bands) {
-    if (!bands) return { half: [80, 140], twoThirds: [130, 210], one: [180, 280] };
+    if (!bands) {
+      const one = [180, 280];
+      const half = [80, 140];
+      return {
+        third: bandOneThird(one),
+        half,
+        twoThirds: bandBetween(half, one),
+        one,
+      };
+    }
     const half = bands.half;
     const one = bands.one || bands.full;
-    const out = { half, one };
-    if (bands.twoThirds) out.twoThirds = bands.twoThirds;
-    else if (half && one) out.twoThirds = bandBetween(half, one);
+    const out = {};
+    if (one) {
+      out.one = one;
+      out.third = bands.third || bandOneThird(one);
+    }
+    if (half) {
+      out.half = half;
+      if (one) out.twoThirds = bands.twoThirds || bandBetween(half, one);
+    }
     return out;
   }
 

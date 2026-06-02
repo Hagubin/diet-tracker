@@ -1829,6 +1829,30 @@ html[data-theme="night"] .month-grid--data .month-cell.is-over-budget .month-cel
   margin: 0 0 6px;
 }
 
+/* Four portion sizes — same width as Fixed | Build row (16px side margins) */
+.plate-size-segment--four.portion-segment--inner {
+  margin: 0 16px 10px;
+}
+
+.plate-size-segment--four {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  margin: 0 16px 10px;
+  padding: 2px;
+  background: var(--fill);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.plate-size-segment--four .portion-btn {
+  flex: none;
+  font-size: 11px;
+  padding: 8px 2px;
+  min-height: 32px;
+  letter-spacing: -0.2px;
+}
+
 .plate-line-kcal {
   font-size: 13px;
   color: var(--label-secondary);

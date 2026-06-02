@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 64;
+  const APP_RELEASE = 65;
   const BUILD_STORAGE_KEY = "dietAppBuild";
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
@@ -2214,7 +2214,7 @@
         if (d.container) {
           const sizes = PM.sizesForContainer(d.container);
           const seg = document.createElement("div");
-          seg.className = "portion-segment portion-segment--inner plate-size-segment";
+          seg.className = "portion-segment portion-segment--inner plate-size-segment plate-size-segment--four";
           sizes.forEach((size) => {
             const b = document.createElement("button");
             b.type = "button";
