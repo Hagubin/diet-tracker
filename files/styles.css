@@ -1812,45 +1812,42 @@ html[data-theme="night"] .month-grid--data .month-cell.is-over-budget .month-cel
   margin-top: 6px;
 }
 
-.plate-vessel-segment {
+/* Bowl/Plate and ¼–½–⅔–1 rows: full width of build list (matches list padding) */
+.plate-portion-track {
   display: flex;
-  margin-bottom: 8px;
+  width: 100%;
+  margin: 0 0 8px;
   padding: 2px;
   background: var(--fill);
   border-radius: 8px;
   gap: 2px;
+  box-sizing: border-box;
 }
 
-.plate-vessel-segment .portion-btn {
-  flex: 1;
-}
-
-.plate-size-segment {
-  margin: 0 0 6px;
-}
-
-/* Four portion sizes — same width as Fixed | Build row (16px side margins) */
-.plate-size-segment--four.portion-segment--inner {
-  margin: 0 16px 10px;
+.plate-portion-track .portion-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  text-align: center;
 }
 
 .plate-size-segment--four {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 2px;
-  margin: 0 16px 10px;
-  padding: 2px;
-  background: var(--fill);
-  border-radius: 8px;
-  box-sizing: border-box;
+  margin-bottom: 10px;
 }
 
 .plate-size-segment--four .portion-btn {
   flex: none;
+  width: 100%;
+  min-width: 0;
   font-size: 11px;
-  padding: 8px 2px;
+  padding: 8px 4px;
   min-height: 32px;
   letter-spacing: -0.2px;
+  text-align: center;
+  justify-self: stretch;
 }
 
 .plate-line-kcal {
