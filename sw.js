@@ -1,5 +1,5 @@
 /* Diet PWA — network-first for app updates (bump CACHE_ID when releasing). */
-const CACHE_ID = "diet-v66";
+const CACHE_ID = "diet-v67";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

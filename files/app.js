@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 66;
+  const APP_RELEASE = 67;
   const BUILD_STORAGE_KEY = "dietAppBuild";
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
@@ -65,7 +65,7 @@
     });
   }
 
-  const DEFAULT_WATER_BOTTLE_ML = 1200;
+  const EXERCISE_MAX_MINUTES = 240;
   const DEFAULT_WATER_GOAL_BOTTLES = 1.5;
   /** Daily fluid above ~45 ml/kg may be risky for many adults (not medical advice). */
   const WATER_ML_PER_KG_CAUTION = 45;
@@ -759,6 +759,11 @@
     if (id === "other") return "Other";
     if (id === "fitness_boxing") return "Fitness Boxing (Switch)";
     return id;
+  }
+
+  function formatWeightKg(w) {
+    if (w == null || !Number.isFinite(w)) return "—";
+    return w.toFixed(2);
   }
 
   function caloriesForExerciseType(id, minutes) {
@@ -1523,12 +1528,12 @@
     if (start == null || current == null) return "—";
     const change = current - start;
     const toGoal = ideal != null ? current - ideal : null;
-    const ch = change >= 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+    const ch = change >= 0 ? `+${formatWeightKg(change)}` : formatWeightKg(change);
     if (toGoal != null) {
-      const to = toGoal >= 0 ? `${toGoal.toFixed(1)} kg to goal` : `${Math.abs(toGoal).toFixed(1)} kg past goal`;
-      return `${current.toFixed(1)} kg · ${ch} from start · ${to}`;
+      const to = toGoal >= 0 ? `${formatWeightKg(toGoal)} kg to goal` : `${formatWeightKg(Math.abs(toGoal))} kg past goal`;
+      return `${formatWeightKg(current)} kg · ${ch} from start · ${to}`;
     }
-    return `${current.toFixed(1)} kg · ${ch} from start`;
+    return `${formatWeightKg(current)} kg · ${ch} from start`;
   }
 
   function addExerciseType(name) {
@@ -1937,7 +1942,7 @@
     const w = getCurrentWeightKg();
     const weightEl = $("weightStatusText");
     if (w != null) {
-      weightEl.textContent = `${w.toFixed(1)} kg`;
+      weightEl.textContent = `${formatWeightKg(w)} kg`;
       weightEl.classList.add("is-set");
     } else {
       weightEl.textContent = "None";
@@ -2390,7 +2395,7 @@
         : d.toLocaleDateString(LOCALE, { weekday: "narrow" });
       const val = document.createElement("span");
       val.className = "chart-value";
-      val.textContent = w != null ? w.toFixed(1) : "";
+      val.textContent = w != null ? formatWeightKg(w) : "";
       wrap.appendChild(bar);
       wrap.appendChild(val);
       wrap.appendChild(label);
@@ -2436,7 +2441,7 @@
       if (w != null) {
         const wEl = document.createElement("span");
         wEl.className = "month-cell-w";
-        wEl.textContent = `${w.toFixed(1)} kg`;
+        wEl.textContent = `${formatWeightKg(w)} kg`;
         cell.appendChild(wEl);
       }
       if (kcal > 0) {
@@ -2634,8 +2639,8 @@
       const manualRaw = $("exerciseCaloriesManual").value;
       const manual = manualRaw === "" ? null : parseInt(manualRaw, 10);
       if (!type || !exerciseTypeById(type)) return;
-      if (!Number.isFinite(minutes) || minutes < 1) return;
-      saveExercise(type, Math.min(30, minutes), manual);
+      if (!Number.isFinite(minutes) || minutes < 1 || minutes > EXERCISE_MAX_MINUTES) return;
+      saveExercise(type, minutes, manual);
     });
 
     $("waterPlus").addEventListener("click", () => setWaterBottles(todayStr(), getWaterBottles(todayStr()) + 1));
