@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <script>
-    window.DIET_APP_BUILD = 67;
+    window.DIET_APP_BUILD = 68;
   </script>
   <script>
     (function () {
@@ -36,7 +36,7 @@
   <link rel="manifest" href="files/manifest.webmanifest" />
   <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
-  <link rel="stylesheet" href="files/styles.css?v=67" />
+  <link rel="stylesheet" href="files/styles.css?v=68" />
 </head>
 <body class="app-shell">
   <header class="site-header">
@@ -251,7 +251,7 @@
           <div class="group">
             <button type="button" class="row-link" id="forceAppUpdateBtn">
               <span class="row-link-label">Load latest version</span>
-              <span class="row-link-meta" id="appVersionLabel">v67</span>
+              <span class="row-link-meta" id="appVersionLabel">v68</span>
             </button>
           </div>
         </div>
@@ -313,40 +313,22 @@
     (function () {
       var key = "dietAppBuild";
       var build = window.DIET_APP_BUILD || 0;
-      var prev = parseInt(localStorage.getItem(key) || "0", 10);
-      if (prev && build > prev) {
-        localStorage.setItem(key, String(build));
-        location.replace(location.pathname + "?build=" + build);
-        return;
+      if (build) {
+        try {
+          localStorage.setItem(key, String(build));
+        } catch (e) {}
       }
-      if (build) localStorage.setItem(key, String(build));
       if ("serviceWorker" in navigator) {
-        var reloaded = false;
-        navigator.serviceWorker.addEventListener("controllerchange", function () {
-          if (reloaded) return;
-          reloaded = true;
-          location.reload();
-        });
         navigator.serviceWorker.register("sw.js").then(function (reg) {
           reg.update();
-          if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
-          reg.addEventListener("updatefound", function () {
-            var worker = reg.installing;
-            if (!worker) return;
-            worker.addEventListener("statechange", function () {
-              if (worker.state === "installed" && navigator.serviceWorker.controller) {
-                reg.waiting && reg.waiting.postMessage({ type: "SKIP_WAITING" });
-              }
-            });
-          });
-        });
+        }).catch(function () {});
       }
     })();
   </script>
-  <script src="files/body-math.js?v=67"></script>
-  <script src="files/plate-meal.js?v=67"></script>
-  <script src="files/drink-meal.js?v=67"></script>
-  <script src="files/sg-nutrition-db.js?v=67"></script>
-  <script src="files/app.js?v=67"></script>
+  <script src="files/body-math.js?v=68"></script>
+  <script src="files/plate-meal.js?v=68"></script>
+  <script src="files/drink-meal.js?v=68"></script>
+  <script src="files/sg-nutrition-db.js?v=68"></script>
+  <script src="files/app.js?v=68"></script>
 </body>
 </html>

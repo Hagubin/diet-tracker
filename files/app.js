@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 67;
+  const APP_RELEASE = 68;
   const BUILD_STORAGE_KEY = "dietAppBuild";
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
@@ -2774,11 +2774,9 @@
         await Promise.all(keys.map((k) => caches.delete(k)));
       }
     } catch (_) {}
-    const remote = await fetchRemoteBuild().catch(() => null);
-    const bump = remote != null ? remote : APP_RELEASE;
-    localStorage.setItem(BUILD_STORAGE_KEY, String(Math.max(0, bump - 1)));
+    localStorage.setItem(BUILD_STORAGE_KEY, String(APP_RELEASE));
     const base = location.pathname.split("?")[0];
-    location.replace(`${base}?refresh=${Date.now()}`);
+    location.replace(`${base}?fresh=${Date.now()}`);
   }
 
   function syncAppVersionLabel() {
