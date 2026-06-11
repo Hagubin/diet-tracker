@@ -2225,3 +2225,42 @@ html[data-theme="night"] .month-grid--data .month-cell.is-over-budget .month-cel
   font-size: 15px;
 }
 
+.emergency-backup {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.emergency-backup.hidden,
+.emergency-backup[hidden] {
+  display: none;
+}
+
+.emergency-backup-panel {
+  width: min(100%, 380px);
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--surface, #fff);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.emergency-backup-panel h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.emergency-backup-panel p {
+  margin: 0 0 12px;
+  color: var(--label-secondary);
+  line-height: 1.4;
+}
+
+.emergency-backup-panel .btn {
+  width: 100%;
+}
+

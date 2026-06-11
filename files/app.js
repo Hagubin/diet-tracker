@@ -2750,4 +2750,5 @@
   window.addEventListener("resize", updateScrollLocks);
   render();
   showView("summary");
+  window.__dietAppReady = true;
 })();

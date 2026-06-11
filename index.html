@@ -51,7 +51,7 @@
   <link rel="manifest" href="files/manifest.webmanifest" />
   <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
-  <link rel="stylesheet" href="files/styles.css?v=69" />
+  <link rel="stylesheet" href="files/styles.css?v=70" />
 </head>
 <body class="app-shell">
   <header class="site-header">
@@ -314,10 +314,90 @@
     </div>
   </div>
 
-  <script src="files/body-math.js?v=69"></script>
-  <script src="files/plate-meal.js?v=69"></script>
-  <script src="files/drink-meal.js?v=69"></script>
-  <script src="files/sg-nutrition-db.js?v=69"></script>
-  <script src="files/app.js?v=69"></script>
+  <div id="emergencyBackup" class="emergency-backup hidden" hidden>
+    <div class="emergency-backup-panel">
+      <h2>Save your backup</h2>
+      <p id="emergencyBackupStatus">Checking this device…</p>
+      <button type="button" class="btn btn-filled" id="emergencyBackupBtn" hidden>Download backup</button>
+      <p class="field-caption">Your data stays on this phone. Nothing is uploaded.</p>
+    </div>
+  </div>
+
+  <script src="files/body-math.js?v=70"></script>
+  <script src="files/plate-meal.js?v=70"></script>
+  <script src="files/drink-meal.js?v=70"></script>
+  <script src="files/sg-nutrition-db.js?v=70"></script>
+  <script src="files/app.js?v=70"></script>
+  <script>
+    (function () {
+      var KEYS = ["dietTracker_v4", "dietTracker_v3", "dietTracker_v2", "dietTracker_v1"];
+
+      function showEmergency() {
+        var panel = document.getElementById("emergencyBackup");
+        if (!panel) return;
+        panel.hidden = false;
+        panel.classList.remove("hidden");
+
+        var status = document.getElementById("emergencyBackupStatus");
+        var btn = document.getElementById("emergencyBackupBtn");
+        var raw = null;
+        var storageKey = null;
+
+        for (var i = 0; i < KEYS.length; i += 1) {
+          var hit = localStorage.getItem(KEYS[i]);
+          if (hit) {
+            raw = hit;
+            storageKey = KEYS[i];
+            break;
+          }
+        }
+
+        if (!raw) {
+          status.textContent = "No Diet data found on this install.";
+          return;
+        }
+
+        var state;
+        try {
+          state = JSON.parse(raw);
+        } catch (e) {
+          status.textContent = "Data found but could not be read.";
+          return;
+        }
+
+        var meals = Array.isArray(state.mealLogs) ? state.mealLogs.length : 0;
+        var weights = Array.isArray(state.weightEntries) ? state.weightEntries.length : 0;
+        status.textContent =
+          "Found " + meals + " meal logs and " + weights + " weight entries. Tap to save a .json file.";
+
+        btn.hidden = false;
+        btn.onclick = function () {
+          var payload = {
+            app: "diet-tracker",
+            backupVersion: 1,
+            storageKey: storageKey,
+            exportedAt: new Date().toISOString(),
+            state: state,
+          };
+          var json = JSON.stringify(payload, null, 2);
+          var blob = new Blob([json], { type: "application/json" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "diet-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          status.textContent = "Backup downloaded — save the file to Files or iCloud.";
+        };
+      }
+
+      if (/[?&]recover=1(?:&|$)/.test(location.search)) showEmergency();
+      setTimeout(function () {
+        if (!window.__dietAppReady) showEmergency();
+      }, 2500);
+    })();
+  </script>
 </body>
 </html>

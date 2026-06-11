@@ -100,7 +100,8 @@
       }
 
       if (!raw) {
-        status.textContent = "No Diet data found on this install. Open the same link you used when you added the app to your Home Screen.";
+        status.textContent =
+          "No Diet data found here. Open this page from the same place you use Diet — your Home Screen icon, not a new Safari tab if you added it to Home Screen.";
         return;
       }
 
@@ -108,7 +109,7 @@
       try {
         state = JSON.parse(raw);
       } catch (e) {
-        status.textContent = "Data is here but could not be read. Try the main app or contact support with a screenshot.";
+        status.textContent = "Data is here but could not be read.";
         return;
       }
 
