@@ -1,11 +1,12 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
+  const APP_RELEASE = 72;
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
   const PM = window.DietPlateMeal;
   const DM = window.DietDrinkMeal;
   const SG = window.DietSgNutrition;
-  const NUTRITION_BUNDLE_V = "60";
+  const NUTRITION_BUNDLE_V = String(APP_RELEASE);
   const nutritionBundles = { drinks: false, food: false };
   const nutritionScriptLoads = new Map();
 
@@ -2713,6 +2714,10 @@
       saveState();
     });
 
+    $("forceAppUpdateBtn")?.addEventListener("click", () => {
+      forceAppUpdate();
+    });
+
     $("exportDataBtn")?.addEventListener("click", exportBackup);
     $("importDataBtn")?.addEventListener("click", () => $("importDataFile")?.click());
     $("importDataFile")?.addEventListener("change", (e) => {
@@ -2751,8 +2756,41 @@
     });
   }
 
+  async function clearAppCaches() {
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (_) {}
+  }
+
+  async function forceAppUpdate() {
+    if (
+      !confirm(
+        "Load the newest Diet app from the server?\n\nYour meal logs and settings stay on this phone. The screen may flash once.\n\nIf your Home Screen icon stays frozen after this, remove it and Add to Home Screen again from Safari."
+      )
+    ) {
+      return;
+    }
+    await clearAppCaches();
+    const base = location.pathname.split("?")[0];
+    location.replace(`${base}?fresh=${Date.now()}`);
+  }
+
+  function syncAppVersionLabel() {
+    const el = $("appVersionLabel");
+    if (el) el.textContent = `v${APP_RELEASE}`;
+  }
+
+  clearAppCaches();
   bindEvents();
   wireIconCacheBust();
+  syncAppVersionLabel();
   window.addEventListener("resize", updateScrollLocks);
   render();
   showView("summary");
