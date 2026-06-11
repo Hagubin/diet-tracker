@@ -51,7 +51,7 @@
   <link rel="manifest" href="files/manifest.webmanifest" />
   <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
-  <link rel="stylesheet" href="files/styles.css?v=70" />
+  <link rel="stylesheet" href="files/styles.css?v=71" />
 </head>
 <body class="app-shell">
   <header class="site-header">
@@ -185,7 +185,7 @@
             </div>
             <div class="exercise-type-list" id="exerciseTypePick"></div>
             <form id="exerciseForm">
-              <div class="field-row"><label for="exerciseMinutes">Duration (min)</label><input type="number" id="exerciseMinutes" min="1" max="30" value="20" /></div>
+              <div class="field-row"><label for="exerciseMinutes">Duration (min)</label><input type="number" id="exerciseMinutes" min="1" max="240" value="20" inputmode="numeric" /></div>
               <div class="field-row"><label for="exerciseCaloriesManual">Calories (opt)</label><input type="number" id="exerciseCaloriesManual" inputmode="numeric" min="0" placeholder="Auto" /></div>
               <div class="field-row field-row-action">
                 <button type="submit" class="btn btn-filled btn-block">Save exercise</button>
@@ -239,7 +239,7 @@
           <div class="view-section view-section--tight">
             <p class="section-label">Update</p>
             <form id="weightForm" class="group">
-              <div class="field-row"><label for="todayWeight">Weight today (kg)</label><input type="number" id="todayWeight" inputmode="decimal" step="0.1" min="30" max="300" /></div>
+              <div class="field-row"><label for="todayWeight">Weight today (kg)</label><input type="number" id="todayWeight" inputmode="decimal" step="0.01" min="30" max="300" /></div>
               <div class="field-row field-row-action"><button type="submit" class="btn btn-filled btn-block">Save weight</button></div>
             </form>
           </div>
@@ -323,11 +323,11 @@
     </div>
   </div>
 
-  <script src="files/body-math.js?v=70"></script>
-  <script src="files/plate-meal.js?v=70"></script>
-  <script src="files/drink-meal.js?v=70"></script>
-  <script src="files/sg-nutrition-db.js?v=70"></script>
-  <script src="files/app.js?v=70"></script>
+  <script src="files/body-math.js?v=71"></script>
+  <script src="files/plate-meal.js?v=71"></script>
+  <script src="files/drink-meal.js?v=71"></script>
+  <script src="files/sg-nutrition-db.js?v=71"></script>
+  <script src="files/app.js?v=71"></script>
   <script>
     (function () {
       var KEYS = ["dietTracker_v4", "dietTracker_v3", "dietTracker_v2", "dietTracker_v1"];
