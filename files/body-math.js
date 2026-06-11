@@ -25,12 +25,12 @@ window.DietBodyMath = (function () {
   }
 
   function boxingCalories(minutes) {
-    const m = Math.max(0, Number(minutes) || 0);
+    const m = Math.min(30, Math.max(0, Number(minutes) || 0));
     return Math.round(BOXING_KCAL_PER_MIN * m);
   }
 
   function exerciseCalories(type, minutes, kcalPerMin) {
-    const m = Math.max(0, Number(minutes) || 0);
+    const m = Math.min(30, Math.max(0, Number(minutes) || 0));
     if (kcalPerMin != null && Number.isFinite(kcalPerMin)) return Math.round(kcalPerMin * m);
     if (type === "fitness_boxing") return boxingCalories(m);
     if (type === "walk") return Math.round(4 * m);

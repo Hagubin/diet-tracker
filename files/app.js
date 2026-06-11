@@ -1,13 +1,11 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 68;
-  const BUILD_STORAGE_KEY = "dietAppBuild";
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
   const PM = window.DietPlateMeal;
   const DM = window.DietDrinkMeal;
   const SG = window.DietSgNutrition;
-  const NUTRITION_BUNDLE_V = String(APP_RELEASE);
+  const NUTRITION_BUNDLE_V = "60";
   const nutritionBundles = { drinks: false, food: false };
   const nutritionScriptLoads = new Map();
 
@@ -65,7 +63,7 @@
     });
   }
 
-  const EXERCISE_MAX_MINUTES = 240;
+  const DEFAULT_WATER_BOTTLE_ML = 1200;
   const DEFAULT_WATER_GOAL_BOTTLES = 1.5;
   /** Daily fluid above ~45 ml/kg may be risky for many adults (not medical advice). */
   const WATER_ML_PER_KG_CAUTION = 45;
@@ -759,11 +757,6 @@
     if (id === "other") return "Other";
     if (id === "fitness_boxing") return "Fitness Boxing (Switch)";
     return id;
-  }
-
-  function formatWeightKg(w) {
-    if (w == null || !Number.isFinite(w)) return "—";
-    return w.toFixed(2);
   }
 
   function caloriesForExerciseType(id, minutes) {
@@ -1528,12 +1521,12 @@
     if (start == null || current == null) return "—";
     const change = current - start;
     const toGoal = ideal != null ? current - ideal : null;
-    const ch = change >= 0 ? `+${formatWeightKg(change)}` : formatWeightKg(change);
+    const ch = change >= 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
     if (toGoal != null) {
-      const to = toGoal >= 0 ? `${formatWeightKg(toGoal)} kg to goal` : `${formatWeightKg(Math.abs(toGoal))} kg past goal`;
-      return `${formatWeightKg(current)} kg · ${ch} from start · ${to}`;
+      const to = toGoal >= 0 ? `${toGoal.toFixed(1)} kg to goal` : `${Math.abs(toGoal).toFixed(1)} kg past goal`;
+      return `${current.toFixed(1)} kg · ${ch} from start · ${to}`;
     }
-    return `${formatWeightKg(current)} kg · ${ch} from start`;
+    return `${current.toFixed(1)} kg · ${ch} from start`;
   }
 
   function addExerciseType(name) {
@@ -1942,7 +1935,7 @@
     const w = getCurrentWeightKg();
     const weightEl = $("weightStatusText");
     if (w != null) {
-      weightEl.textContent = `${formatWeightKg(w)} kg`;
+      weightEl.textContent = `${w.toFixed(1)} kg`;
       weightEl.classList.add("is-set");
     } else {
       weightEl.textContent = "None";
@@ -2200,7 +2193,7 @@
         row.appendChild(head);
 
         const vessel = document.createElement("div");
-        vessel.className = "plate-vessel-segment plate-portion-track";
+        vessel.className = "plate-vessel-segment";
         ["bowl", "plate"].forEach((c) => {
           const b = document.createElement("button");
           b.type = "button";
@@ -2219,7 +2212,7 @@
         if (d.container) {
           const sizes = PM.sizesForContainer(d.container);
           const seg = document.createElement("div");
-          seg.className = "plate-size-segment--four plate-portion-track";
+          seg.className = "portion-segment portion-segment--inner plate-size-segment";
           sizes.forEach((size) => {
             const b = document.createElement("button");
             b.type = "button";
@@ -2395,7 +2388,7 @@
         : d.toLocaleDateString(LOCALE, { weekday: "narrow" });
       const val = document.createElement("span");
       val.className = "chart-value";
-      val.textContent = w != null ? formatWeightKg(w) : "";
+      val.textContent = w != null ? w.toFixed(1) : "";
       wrap.appendChild(bar);
       wrap.appendChild(val);
       wrap.appendChild(label);
@@ -2441,7 +2434,7 @@
       if (w != null) {
         const wEl = document.createElement("span");
         wEl.className = "month-cell-w";
-        wEl.textContent = `${formatWeightKg(w)} kg`;
+        wEl.textContent = `${w.toFixed(1)} kg`;
         cell.appendChild(wEl);
       }
       if (kcal > 0) {
@@ -2639,8 +2632,8 @@
       const manualRaw = $("exerciseCaloriesManual").value;
       const manual = manualRaw === "" ? null : parseInt(manualRaw, 10);
       if (!type || !exerciseTypeById(type)) return;
-      if (!Number.isFinite(minutes) || minutes < 1 || minutes > EXERCISE_MAX_MINUTES) return;
-      saveExercise(type, minutes, manual);
+      if (!Number.isFinite(minutes) || minutes < 1) return;
+      saveExercise(type, Math.min(30, minutes), manual);
     });
 
     $("waterPlus").addEventListener("click", () => setWaterBottles(todayStr(), getWaterBottles(todayStr()) + 1));
@@ -2714,10 +2707,6 @@
       saveState();
     });
 
-    $("forceAppUpdateBtn")?.addEventListener("click", () => {
-      forceAppUpdate();
-    });
-
     $("exportDataBtn")?.addEventListener("click", exportBackup);
     $("importDataBtn")?.addEventListener("click", () => $("importDataFile")?.click());
     $("importDataFile")?.addEventListener("change", (e) => {
@@ -2749,41 +2738,6 @@
     });
   }
 
-  async function fetchRemoteBuild() {
-    const res = await fetch(`files/version.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return Number.isFinite(data.build) ? data.build : null;
-  }
-
-  async function forceAppUpdate() {
-    if (
-      !confirm(
-        "Load the newest Diet app from the server?\n\nYour meal logs and settings stay on this phone. The screen may flash once."
-      )
-    ) {
-      return;
-    }
-    try {
-      if ("serviceWorker" in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister()));
-      }
-      if (window.caches) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k)));
-      }
-    } catch (_) {}
-    localStorage.setItem(BUILD_STORAGE_KEY, String(APP_RELEASE));
-    const base = location.pathname.split("?")[0];
-    location.replace(`${base}?fresh=${Date.now()}`);
-  }
-
-  function syncAppVersionLabel() {
-    const el = $("appVersionLabel");
-    if (el) el.textContent = `v${APP_RELEASE}`;
-  }
-
   function wireIconCacheBust() {
     document.querySelectorAll('link[rel="apple-touch-icon"]').forEach((link) => {
       const base = (link.getAttribute("href") || "").split("?")[0];
@@ -2793,7 +2747,6 @@
 
   bindEvents();
   wireIconCacheBust();
-  syncAppVersionLabel();
   window.addEventListener("resize", updateScrollLocks);
   render();
   showView("summary");
