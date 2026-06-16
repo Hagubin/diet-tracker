@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 72;
+  const APP_RELEASE = 73;
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
   const PM = window.DietPlateMeal;
@@ -2200,7 +2200,7 @@
         row.appendChild(head);
 
         const vessel = document.createElement("div");
-        vessel.className = "plate-vessel-segment";
+        vessel.className = "plate-vessel-segment plate-portion-track";
         ["bowl", "plate"].forEach((c) => {
           const b = document.createElement("button");
           b.type = "button";
@@ -2219,7 +2219,7 @@
         if (d.container) {
           const sizes = PM.sizesForContainer(d.container);
           const seg = document.createElement("div");
-          seg.className = "portion-segment portion-segment--inner plate-size-segment";
+          seg.className = "plate-size-segment--four plate-portion-track";
           sizes.forEach((size) => {
             const b = document.createElement("button");
             b.type = "button";
