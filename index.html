@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <script>
-    window.DIET_APP_BUILD = 75;
+    window.DIET_APP_BUILD = 76;
   </script>
   <script>
     (function () {
@@ -17,7 +17,7 @@
               r.unregister();
             });
           });
-          navigator.serviceWorker.register("sw.js?v=75").catch(function () {});
+          navigator.serviceWorker.register("sw.js?v=76").catch(function () {});
         }
         if (window.caches) {
           caches.keys().then(function (keys) {
@@ -58,7 +58,7 @@
   <link rel="manifest" href="files/manifest.webmanifest" />
   <link rel="icon" href="files/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6" sizes="180x180" />
-  <link rel="stylesheet" href="files/styles.css?v=75" />
+  <link rel="stylesheet" href="files/styles.css?v=76" />
 </head>
 <body class="app-shell">
   <header class="site-header">
@@ -83,7 +83,6 @@
           <div class="group">
             <p class="today-date" id="todayDate"></p>
             <ul class="status-list">
-              <li class="status-row"><span class="status-label">Water</span><span class="status-value" id="waterStatusText">None</span></li>
               <li class="status-row"><span class="status-label">Food</span><span class="status-value" id="foodStatusText">None</span></li>
               <li class="status-row"><span class="status-label">Exercise</span><span class="status-value" id="exerciseStatusText">None</span></li>
               <li class="status-row"><span class="status-label">Weight</span><span class="status-value" id="weightStatusText">None</span></li>
@@ -104,34 +103,6 @@
     <section class="view" id="view-food" data-view="food">
       <div class="food-pane" id="foodScroll">
         <div class="view-section view-section--first view-section--compact">
-          <p class="section-label">Water</p>
-          <div class="group group-padded group--compact">
-            <div class="water-head">
-              <div class="water-count-wrap">
-                <span class="water-count" id="waterCountLine">0 bottles</span>
-                <span class="water-done-tag hidden" id="waterDoneTag">Done</span>
-              </div>
-              <p class="water-per-bottle" id="waterHint">1.2 L per bottle</p>
-            </div>
-            <div
-              class="water-progress"
-              id="waterProgressBar"
-              role="progressbar"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-              aria-label="Water toward daily goal"
-            >
-              <div class="water-progress-fill" id="waterProgressFill"></div>
-            </div>
-            <p class="water-goal-line" id="waterGoalLine">Goal: 1.5 bottles (1.8 L)</p>
-            <div class="water-actions">
-              <button type="button" class="btn btn-tinted" id="waterMinus" aria-label="Remove bottle">−</button>
-              <button type="button" class="btn btn-filled" id="waterPlus">+ Bottle</button>
-            </div>
-          </div>
-        </div>
-        <div class="view-section view-section--compact">
           <p class="section-label">Meals</p>
           <div class="group">
             <div class="meal-tabs" id="mealTypeSegment">
@@ -273,7 +244,7 @@
           <div class="group">
             <button type="button" class="row-link" id="forceAppUpdateBtn">
               <span class="row-link-label">Load latest version</span>
-              <span class="row-link-meta" id="appVersionLabel">v75</span>
+              <span class="row-link-meta" id="appVersionLabel">v76</span>
             </button>
           </div>
         </div>
@@ -340,11 +311,11 @@
     </div>
   </div>
 
-  <script src="files/body-math.js?v=75"></script>
-  <script src="files/plate-meal.js?v=75"></script>
-  <script src="files/drink-meal.js?v=75"></script>
-  <script src="files/sg-nutrition-db.js?v=75"></script>
-  <script src="files/app.js?v=75"></script>
+  <script src="files/body-math.js?v=76"></script>
+  <script src="files/plate-meal.js?v=76"></script>
+  <script src="files/drink-meal.js?v=76"></script>
+  <script src="files/sg-nutrition-db.js?v=76"></script>
+  <script src="files/app.js?v=76"></script>
   <script>
     (function () {
       var KEYS = ["dietTracker_v4", "dietTracker_v3", "dietTracker_v2", "dietTracker_v1"];

@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 75;
+  const APP_RELEASE = 76;
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
   const PM = window.DietPlateMeal;
@@ -1914,10 +1914,12 @@
 
     const bottles = getWaterBottles(todayStr());
     const waterEl = $("waterStatusText");
-    const waterLevel = waterStatusLevel(bottles);
-    waterEl.textContent = bottles ? waterCountHeadline(bottles) : "None";
-    waterEl.classList.toggle("is-set", waterLevel === "done");
-    waterEl.classList.toggle("is-caution", waterLevel === "caution");
+    if (waterEl) {
+      const waterLevel = waterStatusLevel(bottles);
+      waterEl.textContent = bottles ? waterCountHeadline(bottles) : "None";
+      waterEl.classList.toggle("is-set", waterLevel === "done");
+      waterEl.classList.toggle("is-caution", waterLevel === "caution");
+    }
 
     const meals = mealsForToday();
     const foodEl = $("foodStatusText");
@@ -2297,9 +2299,6 @@
 
     if (!fixedOnly && mode === "build") renderBuildPanel();
 
-    const bottles = getWaterBottles(todayStr());
-    updateWaterUI(bottles);
-
     renderFoodTodayList();
   }
 
@@ -2467,16 +2466,10 @@
     const todayList = $("todayFoodList");
     if (!todayList) return;
     const todayMeals = mealsForToday();
-    const bottles = getWaterBottles(todayStr());
-    if (!todayMeals.length && !bottles) {
+    if (!todayMeals.length) {
       todayList.innerHTML = '<p class="empty">None</p>';
     } else {
       todayList.innerHTML = "";
-      if (bottles) {
-        renderLogItem(todayList, "Water", `${waterCountHeadline(bottles)} · ${waterPerBottleNote()}`, () => {
-          setWaterBottles(todayStr(), 0);
-        });
-      }
       todayMeals.forEach((entry) => {
         renderLogItem(todayList, mealLabel(entry.meal), formatPlateLogBody(entry), () => deleteMeal(entry.id));
       });
@@ -2644,8 +2637,8 @@
       saveExercise(type, minutes, manual);
     });
 
-    $("waterPlus").addEventListener("click", () => setWaterBottles(todayStr(), getWaterBottles(todayStr()) + 1));
-    $("waterMinus").addEventListener("click", () => setWaterBottles(todayStr(), getWaterBottles(todayStr()) - 1));
+    $("waterPlus")?.addEventListener("click", () => setWaterBottles(todayStr(), getWaterBottles(todayStr()) + 1));
+    $("waterMinus")?.addEventListener("click", () => setWaterBottles(todayStr(), getWaterBottles(todayStr()) - 1));
 
     ["foodTodayDetails"].forEach((id) => {
       const el = $(id);
