@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "dietTracker_v4";
-  const APP_RELEASE = 73;
+  const APP_RELEASE = 75;
   const LOCALE = "en-US";
   const M = window.DietBodyMath;
   const PM = window.DietPlateMeal;
@@ -65,7 +65,6 @@
   }
 
   const DEFAULT_WATER_BOTTLE_ML = 1200;
-  const EXERCISE_MAX_MINUTES = 240;
   const DEFAULT_WATER_GOAL_BOTTLES = 1.5;
   /** Daily fluid above ~45 ml/kg may be risky for many adults (not medical advice). */
   const WATER_ML_PER_KG_CAUTION = 45;
@@ -1448,7 +1447,9 @@
     for (let d = 1; d <= last.getDate(); d++) {
       days.push(`${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
     }
-    return { days, year: y, month: m - 1, firstWeekday: first.getDay(), key };
+    // Monday-first columns: Mon=0 … Sun=6 (JS getDay is Sun=0)
+    const firstWeekday = (first.getDay() + 6) % 7;
+    return { days, year: y, month: m - 1, firstWeekday, key };
   }
 
   function activeDatesInDays(dayList) {
@@ -2639,7 +2640,7 @@
       const manualRaw = $("exerciseCaloriesManual").value;
       const manual = manualRaw === "" ? null : parseInt(manualRaw, 10);
       if (!type || !exerciseTypeById(type)) return;
-      if (!Number.isFinite(minutes) || minutes < 1 || minutes > EXERCISE_MAX_MINUTES) return;
+      if (!Number.isFinite(minutes) || minutes < 1) return;
       saveExercise(type, minutes, manual);
     });
 
